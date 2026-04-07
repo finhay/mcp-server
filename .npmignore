@@ -1,0 +1,9 @@
+src/
+docs/
+.env
+.env.*
+!.env.example
+tsconfig.json
+*.log
+.DS_Store
+node_modules/

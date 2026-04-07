@@ -1,0 +1,48 @@
+{
+  "name": "@finhay/mcp-server",
+  "version": "1.0.0",
+  "description": "Finhay MCP Server — xem gia co phieu, danh muc dau tu qua Claude AI",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "mcp",
+    "finhay",
+    "stock",
+    "vietnam",
+    "claude",
+    "ai"
+  ],
+  "bin": {
+    "finhay-mcp": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "axios": "^1.7.0",
+    "dotenv": "^17.4.1",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.130",
+    "typescript": "^5.5.0",
+    "vitest": "^1.6.1"
+  },
+  "files": [
+    "dist",
+    "!dist/__tests__"
+  ]
+}

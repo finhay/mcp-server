@@ -21,7 +21,7 @@ Chon **mot trong ba** cach sau:
 Chay lenh sau va nhap API Key/Secret theo huong dan:
 
 ```bash
-npx @finhay/mcp-server --install
+npx -y @finhay/mcp-server --install
 ```
 
 Sau khi hoan tat, khoi dong lai Claude Desktop la xong.

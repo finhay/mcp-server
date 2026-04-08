@@ -13,7 +13,7 @@ export function registerPortfolioTools(server: McpServer, client: FinhayClient, 
         'Get owner identity info (name, accounts, sub-account IDs, etc.)',
         {},
         safeHandler(async () => {
-            const data = await client.get('/users/oa/me');
+            const data = await client.get('/users/v1/users/me');
             return JSON.stringify(data.result, null, 2);
         }),
     );

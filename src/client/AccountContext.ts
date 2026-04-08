@@ -17,11 +17,19 @@ export class AccountContext {
 
     async init(): Promise<void> {
         try {
-            const data = await this.client.get('/users/oa/me');
-            const result = data.result ?? data.data;
+            // Step 1: get userId
+            const meData = await this.client.get('/users/v1/users/me');
+            const meResult = meData.result ?? meData.data;
+            const userId = meResult?.user_id ?? meResult?.userId ?? meResult?.id ?? '';
 
-            const userId = result?.id ?? result?.userId ?? '';
-            const subAccounts: any[] = result?.subAccounts ?? result?.sub_accounts ?? [];
+            if (!userId) {
+                throw new Error('Could not extract userId from /users/v1/users/me');
+            }
+
+            // Step 2: get sub-accounts
+            const subData = await this.client.get(`/users/v1/users/${userId}/sub-accounts`);
+            const subResult = subData.result ?? subData.data ?? [];
+            const subAccounts: any[] = Array.isArray(subResult) ? subResult : subResult?.subAccounts ?? subResult?.sub_accounts ?? [];
 
             const subAccountIds = subAccounts.map(
                 (sa: any) => sa.subAccountId ?? sa.sub_account_id ?? sa.id ?? '',

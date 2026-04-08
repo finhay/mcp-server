@@ -7,7 +7,7 @@ export interface Config {
 export function getConfig(): Config {
     const apiKey = process.env.FINHAY_API_KEY;
     const apiSecret = process.env.FINHAY_API_SECRET;
-    const baseUrl = process.env.FINHAY_BASE_URL || 'https://api.finhay.com.vn';
+    const baseUrl = process.env.FINHAY_BASE_URL || 'https://open-api.fhsc.com.vn';
 
     if (!apiKey) {
         console.error('Error: FINHAY_API_KEY env var is required.');

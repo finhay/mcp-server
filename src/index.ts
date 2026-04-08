@@ -1,5 +1,12 @@
 #!/usr/bin/env node
-import 'dotenv/config';
+
+// Route to installer if --install flag is passed
+if (process.argv.includes('--install')) {
+    const { run } = await import('./install.js');
+    await run;
+    process.exit(0);
+}
+
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { getConfig } from './config/environment.js';

@@ -6,7 +6,7 @@ MCP Server cho Finhay Securities — xem gia co phieu, danh muc dau tu, vang, cr
 
 ### Buoc 1: Tao API Key
 
-Vao [https://openapi.finhay.com.vn](https://openapi.finhay.com.vn) → Dang nhap → Tao API Key.
+Vao [https://www.finhay.com.vn/finhay-skills](https://www.finhay.com.vn/finhay-skills) → Dang nhap → Tao API Key.
 
 Ban se nhan duoc:
 - **API Key**: `ak_live_xxx`
@@ -14,35 +14,53 @@ Ban se nhan duoc:
 
 ### Buoc 2: Ket noi voi Claude
 
-**Claude Code CLI:**
+Chon **mot trong ba** cach sau:
+
+#### Cach 1: Cai dat tu dong (Khuyen dung)
+
+Chay lenh sau va nhap API Key/Secret theo huong dan:
 
 ```bash
-claude mcp add finhay \
-  --env FINHAY_API_KEY=ak_live_xxx \
-  --env FINHAY_API_SECRET=sk_live_yyy \
-  --env FINHAY_BASE_URL=https://open-api.fhsc.com.vn \
-  -- npx -y @finhay/mcp-server
+npx @finhay/mcp-server --install
 ```
 
-**Claude Desktop:**
+Sau khi hoan tat, khoi dong lai Claude Desktop la xong.
 
-Them vao file config (`~/Library/Application Support/Claude/claude_desktop_config.json` tren macOS):
+#### Cach 2: Claude Code CLI
+
+Neu ban da cai [Claude Code](https://docs.anthropic.com/en/docs/claude-code), chay:
+
+```bash
+claude mcp add finhay -- npx -y @finhay/mcp-server
+```
+
+Config se tu dong dong bo sang Claude Desktop.
+
+#### Cach 3: Cau hinh thu cong
+
+**Buoc 3a.** Tao file credentials tai `~/.finhay/credentials/.env`:
+
+```
+FINHAY_API_KEY=ak_live_xxx
+FINHAY_API_SECRET=sk_live_yyy
+```
+
+**Buoc 3b.** Them vao file config Claude Desktop:
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
   "mcpServers": {
     "finhay": {
       "command": "npx",
-      "args": ["-y", "@finhay/mcp-server"],
-      "env": {
-        "FINHAY_API_KEY": "ak_live_xxx",
-        "FINHAY_API_SECRET": "sk_live_yyy",
-        "FINHAY_BASE_URL": "https://open-api.fhsc.com.vn"
-      }
+      "args": ["-y", "@finhay/mcp-server"]
     }
   }
 }
 ```
+
+> API Key/Secret **khong nam** trong file config Claude — duoc luu rieng tai `~/.finhay/credentials/.env` (dung chung voi Finhay Skills).
 
 ### Buoc 3: Su dung
 
@@ -93,19 +111,8 @@ Mo Claude, hoi:
 | `get_user_rights` | Quyen co dong: co tuc, quyen mua... |
 | `get_trade_info` | Suc mua / so luong ban duoc |
 
-## Bao mat
-
-- API Key + Secret chi nam tren may cua ban, **khong gui qua MCP protocol**
-- Moi request duoc ky HMAC-SHA256 — secret khong bao gio roi khoi may
-- Claude AI **khong thay** API Key cua ban
-- Revoke key bat cu luc nao tren web portal
 
 ## Yeu cau
 
 - Node.js >= 18
 - Tai khoan Finhay Securities voi API Key
-
-## Ho tro
-
-- Web: [https://openapi.finhay.com.vn](https://openapi.finhay.com.vn)
-- Email: support@finhay.com.vn

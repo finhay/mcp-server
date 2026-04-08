@@ -21,7 +21,7 @@ Chon **mot trong ba** cach sau:
 Chay lenh sau va nhap API Key/Secret theo huong dan:
 
 ```bash
-npx -y @finhay/mcp-server --install
+npx -y finhay-mcp --install
 ```
 
 Sau khi hoan tat, khoi dong lai Claude Desktop la xong.
@@ -31,7 +31,7 @@ Sau khi hoan tat, khoi dong lai Claude Desktop la xong.
 Neu ban da cai [Claude Code](https://docs.anthropic.com/en/docs/claude-code), chay:
 
 ```bash
-claude mcp add finhay -- npx -y @finhay/mcp-server
+claude mcp add finhay -- npx -y finhay-mcp
 ```
 
 Config se tu dong dong bo sang Claude Desktop.

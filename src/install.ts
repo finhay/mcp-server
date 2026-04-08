@@ -120,7 +120,7 @@ function updateClaudeConfig(): void {
 
     config.mcpServers.finhay = {
         command: 'npx',
-        args: ['-y', '@finhay/mcp-server'],
+        args: ['-y', 'finhay-mcp'],
     };
 
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');

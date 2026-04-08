@@ -17,7 +17,7 @@
     "ai"
   ],
   "bin": {
-    "mcp-server": "dist/index.js"
+    "finhay-mcp": "dist/index.js"
   },
   "main": "dist/index.js",
   "engines": {

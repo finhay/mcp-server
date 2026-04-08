@@ -60,6 +60,13 @@ function getClaudeConfigPath(): string {
     if (platform === 'darwin') {
         return path.join(os.homedir(), 'Library', 'Application Support', 'Claude', 'claude_desktop_config.json');
     } else if (platform === 'win32') {
+        // Microsoft Store version uses LocalCache path
+        const localAppData = process.env.LOCALAPPDATA || '';
+        const storePath = path.join(localAppData, 'Packages', 'Claude_pzs8sxrjxfjjc', 'LocalCache', 'Roaming', 'Claude', 'claude_desktop_config.json');
+        if (fs.existsSync(storePath) || fs.existsSync(path.dirname(storePath))) {
+            return storePath;
+        }
+        // Standard installer version
         return path.join(process.env.APPDATA || '', 'Claude', 'claude_desktop_config.json');
     } else {
         return path.join(os.homedir(), '.config', 'Claude', 'claude_desktop_config.json');

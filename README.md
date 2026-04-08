@@ -48,6 +48,7 @@ FINHAY_API_SECRET=sk_live_yyy
 **Buoc 3b.** Them vao file config Claude Desktop:
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+- Windows (Microsoft Store): `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\claude_desktop_config.json`
 
 ```json
 {

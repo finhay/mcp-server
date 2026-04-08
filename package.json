@@ -1,6 +1,6 @@
 {
   "name": "@finhay/mcp-server",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Finhay MCP Server — xem gia co phieu, danh muc dau tu qua Claude AI",
   "type": "module",
   "license": "MIT",

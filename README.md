@@ -32,12 +32,12 @@ Mo Terminal (macOS) hoac PowerShell (Windows), dan lenh sau va nhan Enter:
 
 **macOS:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/finhay/mcp-server/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/finhay-pro/finhay-skills-hub/main/skills/_shared/scripts/mcp/install.sh | bash
 ```
 
 **Windows (PowerShell):**
 ```powershell
-irm https://raw.githubusercontent.com/finhay/mcp-server/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/finhay-pro/finhay-skills-hub/main/skills/_shared/scripts/mcp/install.ps1 | iex
 ```
 
 Script se tu dong cai Node.js (neu chua co), hoi API Key/Secret, va cau hinh Claude Desktop.

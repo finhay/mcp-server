@@ -1,34 +1,26 @@
 # finhay-mcp-server
 
-MCP Server cho Finhay Securities — xem gia co phieu, danh muc dau tu, vang, crypto qua Claude AI.
+[Tiếng Việt](README.md) | [English](README.en.md)
 
-## Cai dat
+MCP Server cho Finhay Securities — xem giá cổ phiếu, danh mục đầu tư, vàng, crypto qua Claude AI.
 
-### Buoc 1: Tao API Key
+## Cài đặt
 
-Vao [https://www.finhay.com.vn/finhay-skills](https://www.finhay.com.vn/finhay-skills) → Dang nhap → Tao API Key.
+### Bước 1: Tạo API Key
 
-Ban se nhan duoc:
+Vào [https://www.finhay.com.vn/finhay-skills](https://www.finhay.com.vn/finhay-skills) → Đăng nhập → Tạo API Key.
+
+Bạn sẽ nhận được:
 - **API Key**: `ak_live_xxx`
 - **API Secret**: `sk_live_yyy`
 
-### Buoc 2: Ket noi voi Claude
+### Bước 2: Kết nối với Claude
 
-Chon **mot trong bon** cach sau:
+Chọn **một trong ba** cách sau:
 
-#### Cach 1: Cai dat nhanh (can Node.js)
+#### Cách 1: Cài đặt tự động (không cần Node.js — khuyên dùng)
 
-Neu ban da co Node.js (>= 18), chay lenh sau:
-
-```bash
-npx -y finhay-mcp-server --install
-```
-
-Script se hoi API Key/Secret (Secret duoc an bang dau `*`), tu dong ghi config vao Claude Desktop.
-
-#### Cach 2: Cai dat tu dong (khong can Node.js)
-
-Mo Terminal (macOS) hoac PowerShell (Windows), dan lenh sau va nhan Enter:
+Mở Terminal (macOS) hoặc PowerShell (Windows), dán lệnh sau và nhấn Enter:
 
 **macOS:**
 ```bash
@@ -40,28 +32,28 @@ curl -fsSL https://raw.githubusercontent.com/finhay-pro/finhay-skills-hub/main/s
 irm https://raw.githubusercontent.com/finhay-pro/finhay-skills-hub/main/skills/_shared/scripts/mcp/install.ps1 | iex
 ```
 
-Script se tu dong cai Node.js (neu chua co), hoi API Key/Secret, va cau hinh Claude Desktop.
+Script sẽ tự động cài Node.js (nếu chưa có), hỏi API Key/Secret, và cấu hình Claude Desktop.
 
-#### Cach 3: Claude Code CLI
+#### Cách 2: Cài đặt nhanh (cần Node.js)
 
-Neu ban da cai [Claude Code](https://docs.anthropic.com/en/docs/claude-code) va muon su dung trong terminal:
+Nếu bạn đã có Node.js (>= 18), chạy lệnh sau:
 
 ```bash
-claude mcp add finhay -- npx -y finhay-mcp-server
+npx -y finhay-mcp-server --install
 ```
 
-> Luu y: Cach nay chi them MCP server vao Claude Code CLI, **khong dong bo** sang Claude Desktop. Neu muon dung tren Claude Desktop, hay dung Cach 1, 2 hoac 4.
+Script sẽ hỏi API Key/Secret (Secret được ẩn bằng dấu `*`), tự động ghi config vào Claude Desktop.
 
-#### Cach 4: Cau hinh thu cong
+#### Cách 3: Cấu hình thủ công
 
-**Buoc 3a.** Tao file credentials tai `~/.finhay/credentials/.env`:
+**Bước 3a.** Tạo file credentials tại `~/.finhay/credentials/.env`:
 
 ```
 FINHAY_API_KEY=ak_live_xxx
 FINHAY_API_SECRET=sk_live_yyy
 ```
 
-**Buoc 3b.** Them vao file config Claude Desktop:
+**Bước 3b.** Thêm vào file config Claude Desktop:
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 - Windows (Microsoft Store): `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\claude_desktop_config.json`
@@ -77,61 +69,61 @@ FINHAY_API_SECRET=sk_live_yyy
 }
 ```
 
-> API Key/Secret **khong nam** trong file config Claude — duoc luu rieng tai `~/.finhay/credentials/.env` (dung chung voi Finhay Skills).
+> API Key/Secret **không nằm** trong file config Claude — được lưu riêng tại `~/.finhay/credentials/.env` (dùng chung với Finhay Skills).
 
-Sau khi hoan tat, khoi dong lai Claude Desktop la xong.
+Sau khi hoàn tất, khởi động lại Claude Desktop là xong.
 
-### Buoc 3: Su dung
+### Bước 3: Sử dụng
 
-Mo Claude, hoi:
+Mở Claude, hỏi:
 
-- "Gia co phieu VNM hom nay?"
-- "Xem danh muc dau tu cua toi"
-- "So sanh FPT va VNM"
-- "Gia vang SJC hom nay bao nhieu?"
-- "Lai suat tiet kiem ngan hang nao cao nhat?"
-- "Chi so CPI Viet Nam gan day?"
+- "Giá cổ phiếu VNM hôm nay?"
+- "Xem danh mục đầu tư của tôi"
+- "So sánh FPT và VNM"
+- "Giá vàng SJC hôm nay bao nhiêu?"
+- "Lãi suất tiết kiệm ngân hàng nào cao nhất?"
+- "Chỉ số CPI Việt Nam gần đây?"
 
 ## Tools
 
-### Thi truong (18 tools)
+### Thị trường (16 tools)
 
-| Tool | Mo ta |
+| Tool | Mô tả |
 |------|-------|
-| `get_stock_realtime` | Gia co phieu realtime (1 ma, nhieu ma, hoac theo san) |
-| `get_price_history_chart` | Lich su gia OHLCV |
-| `get_recommendation_reports` | Bao cao phan tich tu chuyen gia |
-| `get_funds` | Danh sach quy dau tu |
-| `get_fund_portfolio` | Danh muc cua quy |
-| `get_fund_months` | Cac thang co du lieu quy |
-| `get_gold_prices` | Gia vang (SJC, DOJI, PNJ, BTMC) |
-| `get_gold_chart` | Bieu do gia vang |
-| `get_gold_providers` | Gia vang theo nha cung cap |
-| `get_silver_prices` | Gia bac |
-| `get_silver_chart` | Bieu do gia bac |
-| `get_all_financial_data` | Tong hop: vang, bac, crypto, lai suat, ty gia |
-| `get_bank_interest_rates` | Lai suat tiet kiem ngan hang |
-| `get_crypto_top_trending` | Crypto xu huong |
-| `get_macro_data` | Chi so vi mo (CPI, PMI, IIP, FED rate...) |
-| `get_market_session` | Trang thai phien giao dich |
+| `get_stock_realtime` | Giá cổ phiếu realtime (1 mã, nhiều mã, hoặc theo sàn) |
+| `get_price_history_chart` | Lịch sử giá OHLCV |
+| `get_recommendation_reports` | Báo cáo phân tích từ chuyên gia |
+| `get_funds` | Danh sách quỹ đầu tư |
+| `get_fund_portfolio` | Danh mục của quỹ |
+| `get_fund_months` | Các tháng có dữ liệu quỹ |
+| `get_gold_prices` | Giá vàng (SJC, DOJI, PNJ, BTMC) |
+| `get_gold_chart` | Biểu đồ giá vàng |
+| `get_gold_providers` | Giá vàng theo nhà cung cấp |
+| `get_silver_prices` | Giá bạc |
+| `get_silver_chart` | Biểu đồ giá bạc |
+| `get_all_financial_data` | Tổng hợp: vàng, bạc, crypto, lãi suất, tỷ giá |
+| `get_bank_interest_rates` | Lãi suất tiết kiệm ngân hàng |
+| `get_crypto_top_trending` | Crypto xu hướng |
+| `get_macro_data` | Chỉ số vĩ mô (CPI, PMI, IIP, FED rate...) |
+| `get_market_session` | Trạng thái phiên giao dịch |
 
-### Tai khoan (11 tools)
+### Tài khoản (10 tools)
 
-| Tool | Mo ta |
+| Tool | Mô tả |
 |------|-------|
-| `get_owner_info` | Thong tin chu tai khoan |
-| `get_account_summary` | So du: tien mat, chung khoan, ky quy |
-| `get_asset_summary` | Tong tai san |
-| `get_portfolio` | Danh muc co phieu voi lai/lo |
-| `get_pnl_today` | Lai/lo hom nay |
-| `get_order_history` | Lich su lenh |
-| `get_order_book` | So lenh trong ngay |
-| `get_order_detail` | Chi tiet 1 lenh |
-| `get_user_rights` | Quyen co dong: co tuc, quyen mua... |
-| `get_trade_info` | Suc mua / so luong ban duoc |
+| `get_owner_info` | Thông tin chủ tài khoản |
+| `get_account_summary` | Số dư: tiền mặt, chứng khoán, ký quỹ |
+| `get_asset_summary` | Tổng tài sản |
+| `get_portfolio` | Danh mục cổ phiếu với lãi/lỗ |
+| `get_pnl_today` | Lãi/lỗ hôm nay |
+| `get_order_history` | Lịch sử lệnh |
+| `get_order_book` | Sổ lệnh trong ngày |
+| `get_order_detail` | Chi tiết 1 lệnh |
+| `get_user_rights` | Quyền cổ đông: cổ tức, quyền mua... |
+| `get_trade_info` | Sức mua / số lượng bán được |
 
 
-## Yeu cau
+## Yêu cầu
 
 - Node.js >= 18
-- Tai khoan Finhay Securities voi API Key
+- Tài khoản Finhay Securities với API Key

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "finhay-market": {
+      "source": "finhay-pro/finhay-skills-hub",
+      "sourceType": "github",
+      "computedHash": "55b861a7da3284f2d4bfd11589b45685886777a3e31a2d8bdaaeb5d2a5136403"
+    }
+  }
+}

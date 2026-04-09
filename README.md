@@ -14,29 +14,45 @@ Ban se nhan duoc:
 
 ### Buoc 2: Ket noi voi Claude
 
-Chon **mot trong ba** cach sau:
+Chon **mot trong bon** cach sau:
 
-#### Cach 1: Cai dat tu dong (Khuyen dung)
+#### Cach 1: Cai dat nhanh (can Node.js)
 
-Chay lenh sau va nhap API Key/Secret theo huong dan:
+Neu ban da co Node.js (>= 18), chay lenh sau:
 
 ```bash
 npx -y finhay-mcp-server --install
 ```
 
-Sau khi hoan tat, khoi dong lai Claude Desktop la xong.
+Script se hoi API Key/Secret (Secret duoc an bang dau `*`), tu dong ghi config vao Claude Desktop.
 
-#### Cach 2: Claude Code CLI
+#### Cach 2: Cai dat tu dong (khong can Node.js)
 
-Neu ban da cai [Claude Code](https://docs.anthropic.com/en/docs/claude-code), chay:
+Mo Terminal (macOS) hoac PowerShell (Windows), dan lenh sau va nhan Enter:
+
+**macOS:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/finhay/mcp-server/main/install.sh | bash
+```
+
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/finhay/mcp-server/main/install.ps1 | iex
+```
+
+Script se tu dong cai Node.js (neu chua co), hoi API Key/Secret, va cau hinh Claude Desktop.
+
+#### Cach 3: Claude Code CLI
+
+Neu ban da cai [Claude Code](https://docs.anthropic.com/en/docs/claude-code) va muon su dung trong terminal:
 
 ```bash
 claude mcp add finhay -- npx -y finhay-mcp-server
 ```
 
-Config se tu dong dong bo sang Claude Desktop.
+> Luu y: Cach nay chi them MCP server vao Claude Code CLI, **khong dong bo** sang Claude Desktop. Neu muon dung tren Claude Desktop, hay dung Cach 1, 2 hoac 4.
 
-#### Cach 3: Cau hinh thu cong
+#### Cach 4: Cau hinh thu cong
 
 **Buoc 3a.** Tao file credentials tai `~/.finhay/credentials/.env`:
 
@@ -55,13 +71,15 @@ FINHAY_API_SECRET=sk_live_yyy
   "mcpServers": {
     "finhay": {
       "command": "npx",
-      "args": ["-y", "@finhay/mcp-server"]
+      "args": ["-y", "finhay-mcp-server"]
     }
   }
 }
 ```
 
 > API Key/Secret **khong nam** trong file config Claude — duoc luu rieng tai `~/.finhay/credentials/.env` (dung chung voi Finhay Skills).
+
+Sau khi hoan tat, khoi dong lai Claude Desktop la xong.
 
 ### Buoc 3: Su dung
 

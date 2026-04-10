@@ -1,5 +1,7 @@
 # finhay-mcp-server
 
+<!-- mcp-name: io.github.finhay/mcp-server -->
+
 [Tiếng Việt](README.md) | [English](README.en.md)
 
 MCP Server for Finhay Securities — view stock prices, portfolio, gold, crypto via Claude AI.

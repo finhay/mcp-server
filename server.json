@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.finhay/mcp-server",
+  "description": "MCP Server for Finhay Securities — view stock prices, portfolio, gold, silver, crypto, and macro data via AI assistants",
+  "version": "1.0.7",
+  "repository": {
+    "url": "https://github.com/finhay/mcp-server",
+    "source": "github"
+  },
+  "websiteUrl": "https://www.finhay.com.vn/finhay-skills",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "finhay-mcp-server",
+      "version": "1.0.7",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

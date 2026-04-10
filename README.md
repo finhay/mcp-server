@@ -88,7 +88,7 @@ Mở Claude, hỏi:
 
 ## Tools
 
-### Thị trường (16 tools)
+### Thị trường (20 tools)
 
 | Tool | Mô tả |
 |------|-------|
@@ -103,17 +103,20 @@ Mở Claude, hỏi:
 | `get_gold_providers` | Giá vàng theo nhà cung cấp |
 | `get_silver_prices` | Giá bạc |
 | `get_silver_chart` | Biểu đồ giá bạc |
+| `get_metal_providers` | Giá vàng + bạc theo nhà cung cấp |
 | `get_all_financial_data` | Tổng hợp: vàng, bạc, crypto, lãi suất, tỷ giá |
 | `get_bank_interest_rates` | Lãi suất tiết kiệm ngân hàng |
 | `get_crypto_top_trending` | Crypto xu hướng |
+| `get_company_financial_overview` | Tổng quan tài chính doanh nghiệp (PE, PB, ROE, EPS...) |
+| `get_company_financial_analysis` | Phân tích tài chính theo năm/quý |
+| `get_financial_statement` | Báo cáo tài chính (BCTC, CDKT, LCTT) |
 | `get_macro_data` | Chỉ số vĩ mô (CPI, PMI, IIP, FED rate...) |
 | `get_market_session` | Trạng thái phiên giao dịch |
 
-### Tài khoản (10 tools)
+### Tài khoản (8 tools)
 
 | Tool | Mô tả |
 |------|-------|
-| `get_owner_info` | Thông tin chủ tài khoản |
 | `get_account_summary` | Số dư: tiền mặt, chứng khoán, ký quỹ |
 | `get_asset_summary` | Tổng tài sản |
 | `get_portfolio` | Danh mục cổ phiếu với lãi/lỗ |
@@ -122,7 +125,6 @@ Mở Claude, hỏi:
 | `get_order_book` | Sổ lệnh trong ngày |
 | `get_order_detail` | Chi tiết 1 lệnh |
 | `get_user_rights` | Quyền cổ đông: cổ tức, quyền mua... |
-| `get_trade_info` | Sức mua / số lượng bán được |
 
 
 ## Yêu cầu

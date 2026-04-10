@@ -88,7 +88,7 @@ Open Claude and ask:
 
 ## Tools
 
-### Market data (16 tools)
+### Market data (20 tools)
 
 | Tool | Description |
 |------|-------------|
@@ -103,17 +103,20 @@ Open Claude and ask:
 | `get_gold_providers` | Gold prices by provider |
 | `get_silver_prices` | Silver prices |
 | `get_silver_chart` | Silver price chart |
+| `get_metal_providers` | Gold + silver prices by provider |
 | `get_all_financial_data` | All-in-one: gold, silver, crypto, rates, FX |
 | `get_bank_interest_rates` | Bank savings interest rates |
 | `get_crypto_top_trending` | Top trending cryptocurrencies |
+| `get_company_financial_overview` | Company financial overview (PE, PB, ROE, EPS...) |
+| `get_company_financial_analysis` | Financial analysis by year/quarter |
+| `get_financial_statement` | Financial statements (income, balance sheet, cash flow) |
 | `get_macro_data` | Macro indicators (CPI, PMI, IIP, FED rate...) |
 | `get_market_session` | Trading session status |
 
-### Account (10 tools)
+### Account (8 tools)
 
 | Tool | Description |
 |------|-------------|
-| `get_owner_info` | Account owner info |
 | `get_account_summary` | Balance: cash, securities, margin |
 | `get_asset_summary` | Total assets |
 | `get_portfolio` | Stock portfolio with P/L |
@@ -122,7 +125,6 @@ Open Claude and ask:
 | `get_order_book` | Today's order book |
 | `get_order_detail` | Single order detail |
 | `get_user_rights` | Shareholder rights: dividends, rights issues... |
-| `get_trade_info` | Buying power / sellable quantity |
 
 
 ## Requirements

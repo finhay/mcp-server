@@ -6,18 +6,6 @@ import { safeHandler } from '../utils/safeTool.js';
 
 export function registerPortfolioTools(server: McpServer, client: FinhayClient, account: AccountContext): void {
 
-    // --- Owner ---
-
-    server.tool(
-        'get_owner_info',
-        'Get owner identity info (name, accounts, sub-account IDs, etc.)',
-        {},
-        safeHandler(async () => {
-            const data = await client.get('/users/v1/users/me');
-            return JSON.stringify(data.result, null, 2);
-        }),
-    );
-
     // --- Account summary ---
 
     server.tool(
@@ -39,11 +27,11 @@ export function registerPortfolioTools(server: McpServer, client: FinhayClient, 
         'get_asset_summary',
         'Get asset summary with total valuation',
         {
-            subAccountId: z.string().optional().describe('Sub-account ID (auto-detected if omitted)'),
+            userId: z.string().optional().describe('User ID (auto-detected if omitted)'),
         },
-        safeHandler(async ({ subAccountId }) => {
-            const id = account.resolveSubAccountId(subAccountId);
-            const data = await client.get(`/trading/sub-accounts/${id}/asset-summary`);
+        safeHandler(async ({ userId }) => {
+            const uid = account.resolveUserId(userId);
+            const data = await client.get(`/users/v4/users/${uid}/assets/summary`);
             return JSON.stringify(data.data, null, 2);
         }),
     );
@@ -146,40 +134,20 @@ export function registerPortfolioTools(server: McpServer, client: FinhayClient, 
             fromDate: z.string().optional().describe('Start date (YYYY-MM-DD)'),
             toDate: z.string().optional().describe('End date (YYYY-MM-DD)'),
             catType: z.string().optional().describe('Category type, comma-separated or ALL (default: ALL)'),
+            isCom: z.string().optional().describe('Commission filter (default: ALL)'),
             symbol: z.string().optional().describe('Filter by symbol (default: ALL)'),
             status: z.string().optional().describe('Status filter, comma-separated or ALL (default: ALL)'),
         },
-        safeHandler(async ({ subAccountId, fromDate, toDate, catType, symbol, status }) => {
+        safeHandler(async ({ subAccountId, fromDate, toDate, catType, isCom, symbol, status }) => {
             const id = account.resolveSubAccountId(subAccountId);
             const query: Record<string, string> = {};
             if (fromDate) query.fromDate = fromDate;
             if (toDate) query.toDate = toDate;
             if (catType) query.catType = catType;
+            if (isCom) query.isCom = isCom;
             if (symbol) query.symbol = symbol.toUpperCase();
             if (status) query.status = status;
             const data = await client.get(`/trading/v5/account/${id}/user-rights`, query);
-            return JSON.stringify(data.result, null, 2);
-        }),
-    );
-
-    // --- Trade info (pre-order check) ---
-
-    server.tool(
-        'get_trade_info',
-        'Get buying power (BUY) or available quantity (SELL) before placing an order',
-        {
-            subAccountId: z.string().optional().describe('Sub-account ID (auto-detected if omitted)'),
-            symbol: z.string().describe('Stock symbol'),
-            side: z.enum(['BUY', 'SELL']).describe('Order side'),
-            quotePrice: z.number().describe('Quote price in VND'),
-        },
-        safeHandler(async ({ subAccountId, symbol, side, quotePrice }) => {
-            const id = account.resolveSubAccountId(subAccountId);
-            const data = await client.get(`/trading/sub-accounts/${id}/trade-info`, {
-                symbol: symbol.toUpperCase(),
-                side,
-                quote_price: String(quotePrice),
-            });
             return JSON.stringify(data.result, null, 2);
         }),
     );

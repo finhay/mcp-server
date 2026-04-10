@@ -150,6 +150,18 @@ export function registerMarketTools(server: McpServer, client: FinhayClient): vo
         }),
     );
 
+    // --- Metal providers ---
+
+    server.tool(
+        'get_metal_providers',
+        'Get gold and silver prices grouped by provider (superset of gold-providers and silver data)',
+        {},
+        safeHandler(async () => {
+            const data = await client.get('/market/financial-data/metal-providers');
+            return JSON.stringify(data.data, null, 2);
+        }),
+    );
+
     // --- Financial data ---
 
     server.tool(
@@ -178,6 +190,58 @@ export function registerMarketTools(server: McpServer, client: FinhayClient): vo
         {},
         safeHandler(async () => {
             const data = await client.get('/market/financial-data/cryptos/top-trending');
+            return JSON.stringify(data.data, null, 2);
+        }),
+    );
+
+    // --- Company financials ---
+
+    server.tool(
+        'get_company_financial_overview',
+        'Get financial overview for a company: PE, PB, EV/EBITDA, gross margin, ROE, EPS, dividend yield, NIM, ROA, and industry averages',
+        {
+            symbol: z.string().describe('Stock symbol (e.g., VNM)'),
+        },
+        safeHandler(async ({ symbol }) => {
+            const data = await client.get('/market/company-financial/overview', {
+                symbol: symbol.toUpperCase(),
+            });
+            return JSON.stringify(data.data, null, 2);
+        }),
+    );
+
+    server.tool(
+        'get_company_financial_analysis',
+        'Get financial analysis entries by year or quarter for a company',
+        {
+            symbol: z.string().describe('Stock symbol (e.g., VNM)'),
+            period: z.enum(['annual', 'quarterly']).optional().describe('Period type (default: annual)'),
+        },
+        safeHandler(async ({ symbol, period }) => {
+            const query: Record<string, string> = { symbol: symbol.toUpperCase() };
+            if (period) query.period = period;
+            const data = await client.get('/market/company-financial/analysis', query);
+            return JSON.stringify(data.data, null, 2);
+        }),
+    );
+
+    server.tool(
+        'get_financial_statement',
+        'Get financial statements (income statement, balance sheet, or cash flow) for a company',
+        {
+            symbol: z.string().describe('Stock symbol (e.g., VNM)'),
+            type: z.enum(['income-statement', 'balance-sheet', 'cash-flow']).describe('Statement type'),
+            period: z.enum(['annual', 'quarterly']).optional().describe('Period type'),
+            limit: z.number().min(1).max(5).optional().describe('Number of periods to return (1-5, default: 5)'),
+        },
+        safeHandler(async ({ symbol, type, period, limit }) => {
+            const query: Record<string, string> = {
+                symbol: symbol.toUpperCase(),
+                type,
+            };
+            if (period) query.period = period;
+            if (limit) query.limit = String(limit);
+            const data = await client.get('/market/v2/financial-statement/statement', query);
             return JSON.stringify(data.data, null, 2);
         }),
     );

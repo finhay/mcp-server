@@ -24,12 +24,12 @@ Mở Terminal (macOS) hoặc PowerShell (Windows), dán lệnh sau và nhấn En
 
 **macOS:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/finhay-pro/finhay-skills-hub/main/skills/_shared/scripts/mcp/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/finhay/mcp-server/main/install.sh | bash
 ```
 
 **Windows (PowerShell):**
 ```powershell
-irm https://raw.githubusercontent.com/finhay-pro/finhay-skills-hub/main/skills/_shared/scripts/mcp/install.ps1 | iex
+irm https://raw.githubusercontent.com/finhay/mcp-server/main/install.ps1 | iex
 ```
 
 Script sẽ tự động cài Node.js (nếu chưa có), hỏi API Key/Secret, và cấu hình Claude Desktop.

@@ -24,12 +24,12 @@ Open Terminal (macOS) or PowerShell (Windows), paste this command and press Ente
 
 **macOS:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/finhay-pro/finhay-skills-hub/main/skills/_shared/scripts/mcp/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/finhay/mcp-server/main/install.sh | bash
 ```
 
 **Windows (PowerShell):**
 ```powershell
-irm https://raw.githubusercontent.com/finhay-pro/finhay-skills-hub/main/skills/_shared/scripts/mcp/install.ps1 | iex
+irm https://raw.githubusercontent.com/finhay/mcp-server/main/install.ps1 | iex
 ```
 
 The script will auto-install Node.js (if needed), prompt for API Key/Secret, and configure Claude Desktop.

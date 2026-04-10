@@ -1,6 +1,23 @@
 #!/bin/bash
 set -e
 
+# When running via `curl | bash`, stdin is the pipe — any subprocess that reads
+# stdin (brew, sudo, etc.) will eat the rest of the script. Re-execute from a
+# downloaded file so stdin is free for `read` and child processes.
+if [ ! -t 0 ] && [ -z "$FINHAY_REEXEC" ]; then
+    SCRIPT_TMP=$(mktemp)
+    if curl -fsSL https://raw.githubusercontent.com/finhay/mcp-server/main/install.sh -o "$SCRIPT_TMP"; then
+        FINHAY_REEXEC=1 bash "$SCRIPT_TMP" </dev/tty
+        EXIT_CODE=$?
+        rm -f "$SCRIPT_TMP"
+        exit $EXIT_CODE
+    else
+        rm -f "$SCRIPT_TMP"
+        echo "  Loi: Khong the tai script. Vui long thu lai."
+        exit 1
+    fi
+fi
+
 echo ""
 echo "  Finhay MCP Server — Cai dat cho Claude Desktop"
 echo ""
@@ -44,16 +61,17 @@ API_KEY=""
 API_SECRET=""
 
 if [ -f "$CREDS_FILE" ]; then
-    EXISTING_KEY=$(grep -oP '(?<=FINHAY_API_KEY=).+' "$CREDS_FILE" 2>/dev/null || true)
-    EXISTING_SECRET=$(grep -oP '(?<=FINHAY_API_SECRET=).+' "$CREDS_FILE" 2>/dev/null || true)
+    EXISTING_KEY=$(sed -n 's/^FINHAY_API_KEY=//p' "$CREDS_FILE" 2>/dev/null || true)
+    EXISTING_SECRET=$(sed -n 's/^FINHAY_API_SECRET=//p' "$CREDS_FILE" 2>/dev/null || true)
 
     if [ -n "$EXISTING_KEY" ] && [ -n "$EXISTING_SECRET" ]; then
-        MASKED_KEY="${EXISTING_KEY:0:8}***"
+        MASKED_KEY="$(echo "$EXISTING_KEY" | cut -c1-8)***"
         echo "  Tim thay credentials tai $CREDS_FILE"
         echo "  API Key: $MASKED_KEY"
         echo ""
         read -p "  Su dung credentials nay? (Y/n): " REUSE
-        if [ "${REUSE,,}" != "n" ]; then
+        REUSE_LOWER=$(echo "$REUSE" | tr '[:upper:]' '[:lower:]')
+        if [ "$REUSE_LOWER" != "n" ]; then
             API_KEY="$EXISTING_KEY"
             API_SECRET="$EXISTING_SECRET"
         fi
@@ -102,7 +120,6 @@ if [ -f "$CONFIG_PATH" ]; then
         echo "  Claude Desktop config da co entry 'finhay', bo qua."
     else
         # Add finhay to existing mcpServers
-        TMP_FILE=$(mktemp)
         node -e "
             const fs = require('fs');
             const config = JSON.parse(fs.readFileSync('$CONFIG_PATH', 'utf-8'));

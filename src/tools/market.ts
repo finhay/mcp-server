@@ -25,6 +25,28 @@ export function registerMarketTools(server: McpServer, client: FinhayClient): vo
         }),
     );
 
+    // --- News (corporate events) ---
+
+    server.tool(
+        'get_news',
+        'Get stock corporate events (rights issues, dividends, AGM dates, etc.) filtered by symbol(s) and/or date range. Dates must be DD/MM/YYYY format.',
+        {
+            stock: z.string().optional().describe('Single stock symbol (e.g., VNM)'),
+            stocks: z.string().optional().describe('Comma-separated symbols (e.g., VNM,VIC,HPG)'),
+            from_date: z.string().optional().describe('Start date in DD/MM/YYYY (defaults to 1 year ago)'),
+            to_date: z.string().optional().describe('End date in DD/MM/YYYY (only applied when both dates provided)'),
+        },
+        safeHandler(async ({ stock, stocks, from_date, to_date }) => {
+            const query: Record<string, string> = {};
+            if (stock) query.stock = stock.toUpperCase();
+            if (stocks) query.stocks = stocks.toUpperCase();
+            if (from_date) query.from_date = from_date;
+            if (to_date) query.to_date = to_date;
+            const data = await client.get('/market/news', query);
+            return JSON.stringify(data.result, null, 2);
+        }),
+    );
+
     // --- Price history chart ---
 
     server.tool(
@@ -32,7 +54,7 @@ export function registerMarketTools(server: McpServer, client: FinhayClient): vo
         'Get OHLCV price history chart for a stock. Timestamps must be Unix seconds (not milliseconds).',
         {
             symbol: z.string().describe('Stock symbol (e.g., FPT)'),
-            resolution: z.string().optional().describe('Resolution, only "1D" supported').default('1D'),
+            resolution: z.enum(['1D', '5', '15', '30', '1H', '4H']).optional().describe('Chart resolution: 1D (daily), 5/15/30 (minutes), 1H, 4H. Default 1D.').default('1D'),
             from: z.number().describe('Start timestamp in Unix SECONDS'),
             to: z.number().describe('End timestamp in Unix SECONDS'),
         },
@@ -55,43 +77,6 @@ export function registerMarketTools(server: McpServer, client: FinhayClient): vo
         { symbol: z.string().describe('Stock symbol (e.g., VNM)') },
         safeHandler(async ({ symbol }) => {
             const data = await client.get(`/market/recommendation-reports/${symbol.toUpperCase()}`);
-            return JSON.stringify(data.data, null, 2);
-        }),
-    );
-
-    // --- Funds ---
-
-    server.tool(
-        'get_funds',
-        'Get list of all available investment funds with performance data',
-        {},
-        safeHandler(async () => {
-            const data = await client.get('/market/funds');
-            return JSON.stringify(data.data, null, 2);
-        }),
-    );
-
-    server.tool(
-        'get_fund_portfolio',
-        'Get portfolio composition of a specific fund',
-        {
-            fund: z.string().describe('Fund code (e.g., DCDS)'),
-            month: z.string().optional().describe('Month in YYYY-MM format (defaults to latest)'),
-        },
-        safeHandler(async ({ fund, month }) => {
-            const query: Record<string, string> = {};
-            if (month) query.month = month;
-            const data = await client.get(`/market/funds/${fund}/portfolio`, query);
-            return JSON.stringify(data.data, null, 2);
-        }),
-    );
-
-    server.tool(
-        'get_fund_months',
-        'Get available months for a fund portfolio',
-        { fund: z.string().describe('Fund code (e.g., DCDS)') },
-        safeHandler(async ({ fund }) => {
-            const data = await client.get(`/market/funds/${fund}/months`);
             return JSON.stringify(data.data, null, 2);
         }),
     );
@@ -194,6 +179,49 @@ export function registerMarketTools(server: McpServer, client: FinhayClient): vo
         }),
     );
 
+    // --- Market data (global indices, big-tech, commodities, forex) ---
+
+    server.tool(
+        'get_market_data',
+        'Get historical data points for a global market index, big-tech stock, commodity, or forex pair. Results ordered descending by date.',
+        {
+            type: z.enum([
+                'SP500', 'DOW_JONES', 'NASDAQ', 'RUSSELL2000', 'VIX', 'DXY',
+                'KOSPI', 'HANGSENG', 'SHANGHAI', 'NIKKEI',
+                'APPLE', 'MICROSOFT', 'ALPHABET', 'AMAZON', 'META', 'NVIDIA', 'TESLA',
+                'GOLD', 'SILVER', 'COPPER', 'CRUDE_OIL', 'BRENT_OIL', 'NATURAL_GAS',
+                'EURUSD', 'USDJPY', 'GBPUSD',
+            ]).describe('Market data type (US/Asian indices, big-tech stocks, commodities, forex)'),
+            limit: z.number().min(1).max(500).optional().describe('Number of data points (default 50, max 500)'),
+        },
+        safeHandler(async ({ type, limit }) => {
+            const query: Record<string, string> = { type };
+            if (limit) query.limit = String(limit);
+            const data = await client.get('/market/financial-data/market', query);
+            return JSON.stringify(data.data, null, 2);
+        }),
+    );
+
+    // --- Economic calendar events ---
+
+    server.tool(
+        'get_economic_calendar_events',
+        'Get upcoming global economic events (CPI releases, Fed meetings, PMI announcements, etc.)',
+        {
+            weeks: z.number().optional().describe('Number of weeks ahead to fetch (default 1)'),
+            country: z.enum([
+                'China', 'Euro Area', 'Japan', 'United States', 'United Kingdom', 'Vietnam',
+            ]).optional().describe('Filter by country (omit for all countries)'),
+        },
+        safeHandler(async ({ weeks, country }) => {
+            const query: Record<string, string> = {};
+            if (weeks) query.weeks = String(weeks);
+            if (country) query.country = country;
+            const data = await client.get('/market/financial-data/economic-calendar-events', query);
+            return JSON.stringify(data.data, null, 2);
+        }),
+    );
+
     // --- Company financials ---
 
     server.tool(
@@ -250,14 +278,14 @@ export function registerMarketTools(server: McpServer, client: FinhayClient): vo
 
     server.tool(
         'get_macro_data',
-        'Get macroeconomic indicators for Vietnam or US (CPI, PMI, IIP, FED rate, etc.)',
+        'Get macroeconomic indicators for Vietnam or US (CPI, PMI, IIP, FED rate, etc.). JP and DE are only valid when type=GOVERNMENT_10Y_BOND_YIELD.',
         {
             type: z.enum([
                 'IIP', 'CPI', 'PMI', 'PCE', 'CORE_PCE', 'NFP', 'GOODS_RETAIL', 'SERVICE_RETAIL',
                 'TOTAL_EXPORT', 'FDI_EXPORT', 'DOMESTIC_EXPORT', 'FED_FUNDS_RATE', 'INTERBANK_RATE',
                 'GOVERNMENT_10Y_BOND_YIELD', 'UNEMPLOYMENT_RATE',
             ]).describe('Macro indicator type'),
-            country: z.enum(['VN', 'US']).describe('Country code'),
+            country: z.enum(['VN', 'US', 'JP', 'DE']).describe('Country code (JP/DE only for GOVERNMENT_10Y_BOND_YIELD)'),
             period: z.enum(['ONE_MONTH', 'ONE_YEAR', 'YTD']).optional().describe('Time period filter'),
         },
         safeHandler(async ({ type, country, period }) => {

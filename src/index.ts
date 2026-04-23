@@ -22,7 +22,7 @@ await account.init();
 
 const server = new McpServer({
     name: 'finhay-mcp-server',
-    version: '1.0.0',
+    version: '1.1.0',
 });
 
 registerAllTools(server, client, account);

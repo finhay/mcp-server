@@ -93,11 +93,9 @@ Open Claude and ask:
 | Tool | Description |
 |------|-------------|
 | `get_stock_realtime` | Realtime stock prices (single, multiple, or by exchange) |
-| `get_price_history_chart` | OHLCV price history |
+| `get_news` | Stock corporate events (dividends, rights issues, AGM...) |
+| `get_price_history_chart` | OHLCV price history (1D/5/15/30/1H/4H) |
 | `get_recommendation_reports` | Analyst recommendation reports |
-| `get_funds` | List of investment funds |
-| `get_fund_portfolio` | Fund portfolio composition |
-| `get_fund_months` | Available months for fund data |
 | `get_gold_prices` | Gold prices (SJC, DOJI, PNJ, BTMC) |
 | `get_gold_chart` | Gold price chart |
 | `get_gold_providers` | Gold prices by provider |
@@ -107,6 +105,8 @@ Open Claude and ask:
 | `get_all_financial_data` | All-in-one: gold, silver, crypto, rates, FX |
 | `get_bank_interest_rates` | Bank savings interest rates |
 | `get_crypto_top_trending` | Top trending cryptocurrencies |
+| `get_market_data` | Global indices (SP500, Nikkei...), big-tech stocks, commodities, forex |
+| `get_economic_calendar_events` | Upcoming economic events (CPI, Fed meetings, PMI...) |
 | `get_company_financial_overview` | Company financial overview (PE, PB, ROE, EPS...) |
 | `get_company_financial_analysis` | Financial analysis by year/quarter |
 | `get_financial_statement` | Financial statements (income, balance sheet, cash flow) |

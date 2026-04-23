@@ -93,11 +93,9 @@ Mở Claude, hỏi:
 | Tool | Mô tả |
 |------|-------|
 | `get_stock_realtime` | Giá cổ phiếu realtime (1 mã, nhiều mã, hoặc theo sàn) |
-| `get_price_history_chart` | Lịch sử giá OHLCV |
+| `get_news` | Sự kiện doanh nghiệp (cổ tức, quyền mua, ĐHĐCĐ...) |
+| `get_price_history_chart` | Lịch sử giá OHLCV (1D/5/15/30/1H/4H) |
 | `get_recommendation_reports` | Báo cáo phân tích từ chuyên gia |
-| `get_funds` | Danh sách quỹ đầu tư |
-| `get_fund_portfolio` | Danh mục của quỹ |
-| `get_fund_months` | Các tháng có dữ liệu quỹ |
 | `get_gold_prices` | Giá vàng (SJC, DOJI, PNJ, BTMC) |
 | `get_gold_chart` | Biểu đồ giá vàng |
 | `get_gold_providers` | Giá vàng theo nhà cung cấp |
@@ -107,6 +105,8 @@ Mở Claude, hỏi:
 | `get_all_financial_data` | Tổng hợp: vàng, bạc, crypto, lãi suất, tỷ giá |
 | `get_bank_interest_rates` | Lãi suất tiết kiệm ngân hàng |
 | `get_crypto_top_trending` | Crypto xu hướng |
+| `get_market_data` | Dữ liệu chỉ số global (SP500, Nikkei...), big-tech, hàng hoá, forex |
+| `get_economic_calendar_events` | Sự kiện kinh tế sắp tới (CPI, họp Fed, PMI...) |
 | `get_company_financial_overview` | Tổng quan tài chính doanh nghiệp (PE, PB, ROE, EPS...) |
 | `get_company_financial_analysis` | Phân tích tài chính theo năm/quý |
 | `get_financial_statement` | Báo cáo tài chính (BCTC, CDKT, LCTT) |

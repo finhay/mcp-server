@@ -31,7 +31,7 @@ export function registerPortfolioTools(server: McpServer, client: FinhayClient, 
         },
         safeHandler(async ({ userId }) => {
             const uid = account.resolveUserId(userId);
-            const data = await client.get(`/users/v4/users/${uid}/assets/summary`);
+            const data = await client.get(`/users/v3/users/${uid}/assets/summary`);
             return JSON.stringify(data.data, null, 2);
         }),
     );

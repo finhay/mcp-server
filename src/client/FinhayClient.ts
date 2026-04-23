@@ -13,6 +13,9 @@ export class FinhayClient {
         this.http = axios.create({
             baseURL: baseUrl,
             timeout: 15000,
+            headers: {
+                'User-Agent': 'finhay-openapi (Skill)',
+            },
         });
     }
 

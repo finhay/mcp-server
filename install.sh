@@ -22,6 +22,38 @@ echo ""
 echo "  Finhay MCP Server — Cai dat cho Claude Desktop"
 echo ""
 
+# Read input with masked echo (shows '*' per character).
+read_masked() {
+    local prompt="$1"
+    local input=""
+    local char
+
+    printf '%s' "$prompt"
+    stty -echo
+    trap 'stty echo' EXIT
+
+    while IFS= read -r -n1 char; do
+        if [ -z "$char" ]; then
+            break
+        fi
+        if [ "$char" = $'\x7f' ] || [ "$char" = $'\x08' ]; then
+            if [ -n "$input" ]; then
+                input="${input%?}"
+                printf '\b \b'
+            fi
+            continue
+        fi
+        input="${input}${char}"
+        printf '*'
+    done
+
+    stty echo
+    trap - EXIT
+    printf '\n'
+
+    REPLY="$input"
+}
+
 # --- Check & install Node.js ---
 if ! command -v node &>/dev/null; then
     echo "  Node.js chua duoc cai dat. Dang cai dat..."
@@ -59,6 +91,7 @@ CREDS_FILE="$CREDS_DIR/.env"
 
 API_KEY=""
 API_SECRET=""
+OVERWROTE_CREDS=0
 
 if [ -f "$CREDS_FILE" ]; then
     EXISTING_KEY=$(sed -n 's/^FINHAY_API_KEY=//p' "$CREDS_FILE" 2>/dev/null || true)
@@ -69,9 +102,11 @@ if [ -f "$CREDS_FILE" ]; then
         echo "  Tim thay credentials tai $CREDS_FILE"
         echo "  API Key: $MASKED_KEY"
         echo ""
-        read -p "  Su dung credentials nay? (Y/n): " REUSE
-        REUSE_LOWER=$(echo "$REUSE" | tr '[:upper:]' '[:lower:]')
-        if [ "$REUSE_LOWER" != "n" ]; then
+        read -p "Ban co muon thay the khong? (y/n): " REPLACE
+        REPLACE_LOWER=$(echo "$REPLACE" | tr '[:upper:]' '[:lower:]')
+        if [ "$REPLACE_LOWER" = "y" ]; then
+            OVERWROTE_CREDS=1
+        else
             API_KEY="$EXISTING_KEY"
             API_SECRET="$EXISTING_SECRET"
         fi
@@ -80,16 +115,22 @@ if [ -f "$CREDS_FILE" ]; then
 fi
 
 if [ -z "$API_KEY" ]; then
-    echo "  Tao API Key tai: https://www.finhay.com.vn/finhay-skills"
-    echo ""
-    read -p "  API Key: " API_KEY
+    if [ "$OVERWROTE_CREDS" = "1" ]; then
+        read -p "Nhap API Key moi: " API_KEY
+    else
+        read -p "Nhap API Key: " API_KEY
+    fi
     if [ -z "$API_KEY" ]; then
         echo "  Loi: API Key khong duoc de trong."
         exit 1
     fi
 
-    read -s -p "  API Secret: " API_SECRET
-    echo ""
+    if [ "$OVERWROTE_CREDS" = "1" ]; then
+        read_masked "Nhap Secret Key moi: "
+    else
+        read_masked "Nhap Secret Key: "
+    fi
+    API_SECRET="$REPLY"
     if [ -z "$API_SECRET" ]; then
         echo "  Loi: API Secret khong duoc de trong."
         exit 1
@@ -103,9 +144,6 @@ FINHAY_API_SECRET=$API_SECRET
 FINHAY_BASE_URL=https://open-api.fhsc.com.vn
 EOF
     chmod 600 "$CREDS_FILE"
-    echo ""
-    echo "  Credentials: $CREDS_FILE (permission: 600)"
-    echo ""
 fi
 
 # --- Claude Desktop config ---
@@ -115,11 +153,7 @@ CONFIG_DIR=$(dirname "$CONFIG_PATH")
 mkdir -p "$CONFIG_DIR"
 
 if [ -f "$CONFIG_PATH" ]; then
-    # Check if finhay entry already exists
-    if grep -q '"finhay"' "$CONFIG_PATH" 2>/dev/null; then
-        echo "  Claude Desktop config da co entry 'finhay', bo qua."
-    else
-        # Add finhay to existing mcpServers
+    if ! grep -q '"finhay"' "$CONFIG_PATH" 2>/dev/null; then
         node -e "
             const fs = require('fs');
             const config = JSON.parse(fs.readFileSync('$CONFIG_PATH', 'utf-8'));
@@ -141,8 +175,13 @@ else
 EOF
 fi
 
-echo "  Claude Desktop config: $CONFIG_PATH"
 echo ""
-echo "  Da cai dat thanh cong!"
-echo "  Hay khoi dong lai Claude Desktop de su dung."
+if [ "$OVERWROTE_CREDS" = "1" ]; then
+    echo "Da Cap nhat Credentials thanh cong!"
+else
+    echo "Da cai dat thanh cong!"
+fi
+echo "  - Credentials: $CREDS_FILE"
+echo "  - Claude Desktop config: $CONFIG_PATH"
+echo "Hay khoi dong lai ung dung de su dung"
 echo ""

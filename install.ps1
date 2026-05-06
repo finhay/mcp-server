@@ -1,5 +1,28 @@
 $ErrorActionPreference = "Stop"
 
+# Read input with masked echo (shows '*' per character).
+function Read-MaskedInput {
+    param([string]$Prompt)
+    Write-Host -NoNewline $Prompt
+    $Result = ""
+    while ($true) {
+        $Key = [Console]::ReadKey($true)
+        if ($Key.Key -eq [ConsoleKey]::Enter) {
+            Write-Host ""
+            break
+        } elseif ($Key.Key -eq [ConsoleKey]::Backspace) {
+            if ($Result.Length -gt 0) {
+                $Result = $Result.Substring(0, $Result.Length - 1)
+                Write-Host -NoNewline "`b `b"
+            }
+        } elseif (-not [char]::IsControl($Key.KeyChar)) {
+            $Result += $Key.KeyChar
+            Write-Host -NoNewline "*"
+        }
+    }
+    return $Result
+}
+
 function Invoke-FinhayInstall {
     Write-Host ""
     Write-Host "  Finhay MCP Server — Cai dat cho Claude Desktop"
@@ -71,6 +94,7 @@ function Invoke-FinhayInstall {
 
     $ApiKey = ""
     $ApiSecret = ""
+    $OverwroteCreds = $false
 
     if (Test-Path $CredsFile) {
         $Content = Get-Content $CredsFile -Raw
@@ -85,8 +109,10 @@ function Invoke-FinhayInstall {
             Write-Host "  Tim thay credentials tai $CredsFile"
             Write-Host "  API Key: $MaskedKey"
             Write-Host ""
-            $Reuse = Read-Host "  Su dung credentials nay? (Y/n)"
-            if ($Reuse -ne "n") {
+            $Replace = Read-Host "Ban co muon thay the khong? (y/n)"
+            if ($Replace -eq "y") {
+                $OverwroteCreds = $true
+            } else {
                 $ApiKey = $ExistingKey
                 $ApiSecret = $ExistingSecret
             }
@@ -95,17 +121,20 @@ function Invoke-FinhayInstall {
     }
 
     if (-not $ApiKey) {
-        Write-Host "  Tao API Key tai: https://www.finhay.com.vn/finhay-skills"
-        Write-Host ""
-        $ApiKey = Read-Host "  API Key"
+        if ($OverwroteCreds) {
+            $ApiKey = Read-Host "Nhap API Key moi"
+        } else {
+            $ApiKey = Read-Host "Nhap API Key"
+        }
         if (-not $ApiKey) {
             throw "API Key khong duoc de trong."
         }
 
-        $SecureSecret = Read-Host "  API Secret" -AsSecureString
-        $ApiSecret = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
-            [Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecureSecret)
-        )
+        if ($OverwroteCreds) {
+            $ApiSecret = Read-MaskedInput "Nhap Secret Key moi: "
+        } else {
+            $ApiSecret = Read-MaskedInput "Nhap Secret Key: "
+        }
         if (-not $ApiSecret) {
             throw "API Secret khong duoc de trong."
         }
@@ -117,10 +146,6 @@ FINHAY_API_KEY=$ApiKey
 FINHAY_API_SECRET=$ApiSecret
 FINHAY_BASE_URL=https://open-api.fhsc.com.vn
 "@ | Set-Content -Path $CredsFile -Encoding UTF8
-
-        Write-Host ""
-        Write-Host "  Credentials: $CredsFile"
-        Write-Host ""
     }
 
     # --- Claude Desktop config ---
@@ -139,8 +164,6 @@ FINHAY_BASE_URL=https://open-api.fhsc.com.vn
     }
 
     foreach ($ConfigPath in $ConfigPaths) {
-        Write-Host "  Ghi config vao: $ConfigPath"
-
         $ConfigDir = Split-Path $ConfigPath -Parent
         if (-not (Test-Path $ConfigDir)) {
             New-Item -ItemType Directory -Force -Path $ConfigDir | Out-Null
@@ -172,10 +195,6 @@ FINHAY_BASE_URL=https://open-api.fhsc.com.vn
             }
         }
 
-        # Add/update finhay entry
-        if ($McpServers.Contains("finhay")) {
-            Write-Host "  Entry 'finhay' da ton tai, cap nhat lai."
-        }
         $McpServers["finhay"] = [ordered]@{
             command = "npx"
             args = @("-y", "finhay-mcp-server")
@@ -189,8 +208,16 @@ FINHAY_BASE_URL=https://open-api.fhsc.com.vn
         [System.IO.File]::WriteAllText($ConfigPath, $JsonOutput, $Utf8NoBom)
     }
     Write-Host ""
-    Write-Host "  Da cai dat thanh cong!"
-    Write-Host "  Hay khoi dong lai Claude Desktop de su dung."
+    if ($OverwroteCreds) {
+        Write-Host "Da Cap nhat Credentials thanh cong!"
+    } else {
+        Write-Host "Da cai dat thanh cong!"
+    }
+    Write-Host "  - Credentials: $CredsFile"
+    foreach ($Path in $ConfigPaths) {
+        Write-Host "  - Claude Desktop config: $Path"
+    }
+    Write-Host "Hay khoi dong lai ung dung de su dung"
     Write-Host ""
 }
 

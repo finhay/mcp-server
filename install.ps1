@@ -160,6 +160,8 @@ function Invoke-FinhayInstall {
 
     $CredsAction = ""   # create | update | reuse
 
+    Write-Host "Xac thuc ket noi tai khoan FHSC"
+
     if (Test-Path $CredsFile) {
         $Content = Get-Content $CredsFile -Raw
         $KeyMatch = [regex]::Match($Content, 'FINHAY_API_KEY=(.+)')
@@ -169,8 +171,9 @@ function Invoke-FinhayInstall {
             $ExistingKey = $KeyMatch.Groups[1].Value.Trim()
             $MaskedKey = $ExistingKey.Substring(0, [Math]::Min(8, $ExistingKey.Length)) + "***"
 
-            Write-Host "  Tim thay credentials tai $CredsFile"
-            Write-Host "  API Key: $MaskedKey"
+            Write-Host "Tim thay thong tin Credentials $CredsFile"
+            Write-Host "API Key: $MaskedKey"
+            Write-Host "Secret Key: ******"
             Write-Host ""
             $Replace = Read-Host "Ban co muon thay the khong? (y/n)"
             if ($Replace -eq "y") {
@@ -211,9 +214,9 @@ FINHAY_API_KEY=$ApiKey
 FINHAY_API_SECRET=$ApiSecret
 FINHAY_BASE_URL=https://open-api.fhsc.com.vn
 "@ | Set-Content -Path $CredsFile -Encoding UTF8
+        Write-Host ""
     }
 
-    Write-Host ""
     switch ($CredsAction) {
         "create" { Write-Host "Tao Credentials thanh cong tai $CredsFile" }
         "update" { Write-Host "Cap nhat Credentials thanh cong tai $CredsFile" }

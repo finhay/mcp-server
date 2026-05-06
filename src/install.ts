@@ -149,6 +149,8 @@ async function main() {
     type CredsAction = 'create' | 'update' | 'reuse';
     let credsAction: CredsAction = 'create';
 
+    console.log('Xac thuc ket noi tai khoan FHSC');
+
     if (fs.existsSync(CREDENTIALS_PATH)) {
         const content = fs.readFileSync(CREDENTIALS_PATH, 'utf-8');
         const keyMatch = content.match(/FINHAY_API_KEY=(.+)/);
@@ -156,8 +158,9 @@ async function main() {
 
         if (keyMatch && secretMatch) {
             const maskedKey = keyMatch[1].trim().slice(0, 8) + '***';
-            console.log(`  Tim thay credentials tai ${CREDENTIALS_PATH}`);
-            console.log(`  API Key: ${maskedKey}\n`);
+            console.log(`Tim thay thong tin Credentials ${CREDENTIALS_PATH}`);
+            console.log(`API Key: ${maskedKey}`);
+            console.log('Secret Key: ******\n');
 
             const replace = await ask('Ban co muon thay the khong? (y/n): ');
             credsAction = replace.toLowerCase() === 'y' ? 'update' : 'reuse';
@@ -187,9 +190,9 @@ async function main() {
             FINHAY_API_SECRET: apiSecret,
             FINHAY_BASE_URL: 'https://open-api.fhsc.com.vn',
         });
+        console.log();
     }
 
-    console.log();
     if (credsAction === 'create') {
         console.log(`Tao Credentials thanh cong tai ${CREDENTIALS_PATH}`);
     } else if (credsAction === 'update') {

@@ -122,14 +122,17 @@ CREDS_FILE="$CREDS_DIR/.env"
 
 CREDS_ACTION=""   # create | update | reuse
 
+echo "Xac thuc ket noi tai khoan FHSC"
+
 if [ -f "$CREDS_FILE" ]; then
     EXISTING_KEY=$(sed -n 's/^FINHAY_API_KEY=//p' "$CREDS_FILE" 2>/dev/null || true)
     EXISTING_SECRET=$(sed -n 's/^FINHAY_API_SECRET=//p' "$CREDS_FILE" 2>/dev/null || true)
 
     if [ -n "$EXISTING_KEY" ] && [ -n "$EXISTING_SECRET" ]; then
         MASKED_KEY="$(echo "$EXISTING_KEY" | cut -c1-8)***"
-        echo "  Tim thay credentials tai $CREDS_FILE"
-        echo "  API Key: $MASKED_KEY"
+        echo "Tim thay thong tin Credentials $CREDS_FILE"
+        echo "API Key: $MASKED_KEY"
+        echo "Secret Key: ******"
         echo ""
         read -p "Ban co muon thay the khong? (y/n): " REPLACE
         REPLACE_LOWER=$(echo "$REPLACE" | tr '[:upper:]' '[:lower:]')
@@ -175,9 +178,9 @@ FINHAY_API_SECRET=$API_SECRET
 FINHAY_BASE_URL=https://open-api.fhsc.com.vn
 EOF
     chmod 600 "$CREDS_FILE"
+    echo ""
 fi
 
-echo ""
 case "$CREDS_ACTION" in
     create)
         echo "Tao Credentials thanh cong tai $CREDS_FILE"

@@ -104,7 +104,7 @@ function upsertEnvFile(filePath: string, vars: Record<string, string>): void {
     fs.writeFileSync(filePath, content, { mode: 0o600 });
 }
 
-function updateClaudeConfig(): void {
+function updateClaudeConfig(): string {
     const configPath = getClaudeConfigPath();
     const configDir = path.dirname(configPath);
 
@@ -131,15 +131,15 @@ function updateClaudeConfig(): void {
     };
 
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
-    console.log(`  Claude Desktop config: ${configPath}`);
+    return configPath;
 }
 
 async function main() {
     console.log('\n  Finhay MCP Server — Cai dat cho Claude Desktop\n');
-    console.log('  Tao API Key tai: https://www.finhay.com.vn/finhay-skills\n');
 
     let apiKey = '';
     let apiSecret = '';
+    let overwroteCreds = false;
 
     if (fs.existsSync(CREDENTIALS_PATH)) {
         const content = fs.readFileSync(CREDENTIALS_PATH, 'utf-8');
@@ -151,8 +151,10 @@ async function main() {
             console.log(`  Tim thay credentials tai ${CREDENTIALS_PATH}`);
             console.log(`  API Key: ${maskedKey}\n`);
 
-            const reuse = await ask('  Su dung credentials nay? (Y/n): ');
-            if (reuse.toLowerCase() !== 'n') {
+            const replace = await ask('Ban co muon thay the khong? (y/n): ');
+            if (replace.toLowerCase() === 'y') {
+                overwroteCreds = true;
+            } else {
                 apiKey = keyMatch[1].trim();
                 apiSecret = secretMatch[1].trim();
             }
@@ -161,13 +163,17 @@ async function main() {
     }
 
     if (!apiKey) {
-        apiKey = await ask('  API Key: ');
+        apiKey = overwroteCreds
+            ? await ask('Nhap API Key moi: ')
+            : await ask('Nhap API Key: ');
         if (!apiKey) {
             console.error('\n  Loi: API Key khong duoc de trong.\n');
             process.exit(1);
         }
 
-        apiSecret = await askMasked('  API Secret: ');
+        apiSecret = overwroteCreds
+            ? await askMasked('Nhap Secret Key moi: ')
+            : await askMasked('Nhap Secret Key: ');
         if (!apiSecret) {
             console.error('\n  Loi: API Secret khong duoc de trong.\n');
             process.exit(1);
@@ -178,13 +184,16 @@ async function main() {
             FINHAY_API_SECRET: apiSecret,
             FINHAY_BASE_URL: 'https://open-api.fhsc.com.vn',
         });
-        console.log(`\n  Credentials: ${CREDENTIALS_PATH} (permission: 600)\n`);
     }
 
-    updateClaudeConfig();
+    const configPath = updateClaudeConfig();
 
-    console.log('\n  Da cai dat thanh cong!');
-    console.log('  Hay khoi dong lai Claude Desktop de su dung.\n');
+    console.log();
+    console.log(overwroteCreds ? 'Da Cap nhat Credentials thanh cong!' : 'Da cai dat thanh cong!');
+    console.log(`  - Credentials: ${CREDENTIALS_PATH}`);
+    console.log(`  - Claude Desktop config: ${configPath}`);
+    console.log('Hay khoi dong lai ung dung de su dung');
+    console.log();
 }
 
 export const run = main().catch((err) => {

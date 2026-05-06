@@ -28,7 +28,7 @@ function Invoke-FinhayInstall {
     Write-Host "  Finhay MCP Server — Cai dat cho Claude Desktop"
     Write-Host ""
 
-    # --- Check & install Node.js ---
+    # --- Step 1: Check & install Node.js ---
     $NodeExe = $null
     $NodeInstallDir = Join-Path $env:USERPROFILE ".finhay\nodejs"
     $PortableNode = Join-Path $NodeInstallDir "node.exe"
@@ -88,67 +88,7 @@ function Invoke-FinhayInstall {
         Write-Host ""
     }
 
-    # --- Credentials ---
-    $CredsDir = Join-Path $env:USERPROFILE ".finhay\credentials"
-    $CredsFile = Join-Path $CredsDir ".env"
-
-    $ApiKey = ""
-    $ApiSecret = ""
-    $OverwroteCreds = $false
-
-    if (Test-Path $CredsFile) {
-        $Content = Get-Content $CredsFile -Raw
-        $KeyMatch = [regex]::Match($Content, 'FINHAY_API_KEY=(.+)')
-        $SecretMatch = [regex]::Match($Content, 'FINHAY_API_SECRET=(.+)')
-
-        if ($KeyMatch.Success -and $SecretMatch.Success) {
-            $ExistingKey = $KeyMatch.Groups[1].Value.Trim()
-            $ExistingSecret = $SecretMatch.Groups[1].Value.Trim()
-            $MaskedKey = $ExistingKey.Substring(0, [Math]::Min(8, $ExistingKey.Length)) + "***"
-
-            Write-Host "  Tim thay credentials tai $CredsFile"
-            Write-Host "  API Key: $MaskedKey"
-            Write-Host ""
-            $Replace = Read-Host "Ban co muon thay the khong? (y/n)"
-            if ($Replace -eq "y") {
-                $OverwroteCreds = $true
-            } else {
-                $ApiKey = $ExistingKey
-                $ApiSecret = $ExistingSecret
-            }
-            Write-Host ""
-        }
-    }
-
-    if (-not $ApiKey) {
-        if ($OverwroteCreds) {
-            $ApiKey = Read-Host "Nhap API Key moi"
-        } else {
-            $ApiKey = Read-Host "Nhap API Key"
-        }
-        if (-not $ApiKey) {
-            throw "API Key khong duoc de trong."
-        }
-
-        if ($OverwroteCreds) {
-            $ApiSecret = Read-MaskedInput "Nhap Secret Key moi: "
-        } else {
-            $ApiSecret = Read-MaskedInput "Nhap Secret Key: "
-        }
-        if (-not $ApiSecret) {
-            throw "API Secret khong duoc de trong."
-        }
-
-        # Save credentials
-        New-Item -ItemType Directory -Force -Path $CredsDir | Out-Null
-        @"
-FINHAY_API_KEY=$ApiKey
-FINHAY_API_SECRET=$ApiSecret
-FINHAY_BASE_URL=https://open-api.fhsc.com.vn
-"@ | Set-Content -Path $CredsFile -Encoding UTF8
-    }
-
-    # --- Claude Desktop config ---
+    # --- Step 2: Claude Desktop config ---
     # Both paths may exist — prefer the one that Claude Desktop actually uses
     $StorePath = Join-Path $env:LOCALAPPDATA "Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\claude_desktop_config.json"
     $StandardPath = Join-Path $env:APPDATA "Claude\claude_desktop_config.json"
@@ -207,16 +147,79 @@ FINHAY_BASE_URL=https://open-api.fhsc.com.vn
         $Utf8NoBom = New-Object System.Text.UTF8Encoding $false
         [System.IO.File]::WriteAllText($ConfigPath, $JsonOutput, $Utf8NoBom)
     }
+
     Write-Host ""
-    if ($OverwroteCreds) {
-        Write-Host "Da Cap nhat Credentials thanh cong!"
-    } else {
-        Write-Host "Da cai dat thanh cong!"
-    }
-    Write-Host "  - Credentials: $CredsFile"
     foreach ($Path in $ConfigPaths) {
-        Write-Host "  - Claude Desktop config: $Path"
+        Write-Host "Cai dat config Finhay MCP Claude Desktop thanh cong $Path"
     }
+    Write-Host ""
+
+    # --- Step 3: Credentials ---
+    $CredsDir = Join-Path $env:USERPROFILE ".finhay\credentials"
+    $CredsFile = Join-Path $CredsDir ".env"
+
+    $CredsAction = ""   # create | update | reuse
+
+    if (Test-Path $CredsFile) {
+        $Content = Get-Content $CredsFile -Raw
+        $KeyMatch = [regex]::Match($Content, 'FINHAY_API_KEY=(.+)')
+        $SecretMatch = [regex]::Match($Content, 'FINHAY_API_SECRET=(.+)')
+
+        if ($KeyMatch.Success -and $SecretMatch.Success) {
+            $ExistingKey = $KeyMatch.Groups[1].Value.Trim()
+            $MaskedKey = $ExistingKey.Substring(0, [Math]::Min(8, $ExistingKey.Length)) + "***"
+
+            Write-Host "  Tim thay credentials tai $CredsFile"
+            Write-Host "  API Key: $MaskedKey"
+            Write-Host ""
+            $Replace = Read-Host "Ban co muon thay the khong? (y/n)"
+            if ($Replace -eq "y") {
+                $CredsAction = "update"
+            } else {
+                $CredsAction = "reuse"
+            }
+            Write-Host ""
+        }
+    }
+
+    if (-not $CredsAction) {
+        $CredsAction = "create"
+    }
+
+    if ($CredsAction -eq "create" -or $CredsAction -eq "update") {
+        if ($CredsAction -eq "update") {
+            $ApiKey = Read-Host "Nhap API Key moi"
+        } else {
+            $ApiKey = Read-Host "Nhap API Key"
+        }
+        if (-not $ApiKey) {
+            throw "API Key khong duoc de trong."
+        }
+
+        if ($CredsAction -eq "update") {
+            $ApiSecret = Read-MaskedInput "Nhap Secret Key moi: "
+        } else {
+            $ApiSecret = Read-MaskedInput "Nhap Secret Key: "
+        }
+        if (-not $ApiSecret) {
+            throw "Secret Key khong duoc de trong."
+        }
+
+        New-Item -ItemType Directory -Force -Path $CredsDir | Out-Null
+        @"
+FINHAY_API_KEY=$ApiKey
+FINHAY_API_SECRET=$ApiSecret
+FINHAY_BASE_URL=https://open-api.fhsc.com.vn
+"@ | Set-Content -Path $CredsFile -Encoding UTF8
+    }
+
+    Write-Host ""
+    switch ($CredsAction) {
+        "create" { Write-Host "Tao Credentials thanh cong tai $CredsFile" }
+        "update" { Write-Host "Cap nhat Credentials thanh cong tai $CredsFile" }
+        "reuse"  { Write-Host "Su dung credentials hien co tai $CredsFile" }
+    }
+    Write-Host ""
     Write-Host "Hay khoi dong lai ung dung de su dung"
     Write-Host ""
 }

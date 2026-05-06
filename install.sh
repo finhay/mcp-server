@@ -54,7 +54,7 @@ read_masked() {
     REPLY="$input"
 }
 
-# --- Check & install Node.js ---
+# --- Step 1: Check & install Node.js ---
 if ! command -v node &>/dev/null; then
     echo "  Node.js chua duoc cai dat. Dang cai dat..."
     echo ""
@@ -85,83 +85,20 @@ if ! command -v node &>/dev/null; then
     echo ""
 fi
 
-# --- Credentials ---
-CREDS_DIR="$HOME/.finhay/credentials"
-CREDS_FILE="$CREDS_DIR/.env"
-
-API_KEY=""
-API_SECRET=""
-OVERWROTE_CREDS=0
-
-if [ -f "$CREDS_FILE" ]; then
-    EXISTING_KEY=$(sed -n 's/^FINHAY_API_KEY=//p' "$CREDS_FILE" 2>/dev/null || true)
-    EXISTING_SECRET=$(sed -n 's/^FINHAY_API_SECRET=//p' "$CREDS_FILE" 2>/dev/null || true)
-
-    if [ -n "$EXISTING_KEY" ] && [ -n "$EXISTING_SECRET" ]; then
-        MASKED_KEY="$(echo "$EXISTING_KEY" | cut -c1-8)***"
-        echo "  Tim thay credentials tai $CREDS_FILE"
-        echo "  API Key: $MASKED_KEY"
-        echo ""
-        read -p "Ban co muon thay the khong? (y/n): " REPLACE
-        REPLACE_LOWER=$(echo "$REPLACE" | tr '[:upper:]' '[:lower:]')
-        if [ "$REPLACE_LOWER" = "y" ]; then
-            OVERWROTE_CREDS=1
-        else
-            API_KEY="$EXISTING_KEY"
-            API_SECRET="$EXISTING_SECRET"
-        fi
-        echo ""
-    fi
-fi
-
-if [ -z "$API_KEY" ]; then
-    if [ "$OVERWROTE_CREDS" = "1" ]; then
-        read -p "Nhap API Key moi: " API_KEY
-    else
-        read -p "Nhap API Key: " API_KEY
-    fi
-    if [ -z "$API_KEY" ]; then
-        echo "  Loi: API Key khong duoc de trong."
-        exit 1
-    fi
-
-    if [ "$OVERWROTE_CREDS" = "1" ]; then
-        read_masked "Nhap Secret Key moi: "
-    else
-        read_masked "Nhap Secret Key: "
-    fi
-    API_SECRET="$REPLY"
-    if [ -z "$API_SECRET" ]; then
-        echo "  Loi: API Secret khong duoc de trong."
-        exit 1
-    fi
-
-    # Save credentials
-    mkdir -p "$CREDS_DIR"
-    cat > "$CREDS_FILE" <<EOF
-FINHAY_API_KEY=$API_KEY
-FINHAY_API_SECRET=$API_SECRET
-FINHAY_BASE_URL=https://open-api.fhsc.com.vn
-EOF
-    chmod 600 "$CREDS_FILE"
-fi
-
-# --- Claude Desktop config ---
+# --- Step 2: Claude Desktop config ---
 CONFIG_PATH="$HOME/Library/Application Support/Claude/claude_desktop_config.json"
 CONFIG_DIR=$(dirname "$CONFIG_PATH")
 
 mkdir -p "$CONFIG_DIR"
 
 if [ -f "$CONFIG_PATH" ]; then
-    if ! grep -q '"finhay"' "$CONFIG_PATH" 2>/dev/null; then
-        node -e "
-            const fs = require('fs');
-            const config = JSON.parse(fs.readFileSync('$CONFIG_PATH', 'utf-8'));
-            if (!config.mcpServers) config.mcpServers = {};
-            config.mcpServers.finhay = { command: 'npx', args: ['-y', 'finhay-mcp-server'] };
-            fs.writeFileSync('$CONFIG_PATH', JSON.stringify(config, null, 2));
-        "
-    fi
+    node -e "
+        const fs = require('fs');
+        const config = JSON.parse(fs.readFileSync('$CONFIG_PATH', 'utf-8'));
+        if (!config.mcpServers) config.mcpServers = {};
+        config.mcpServers.finhay = { command: 'npx', args: ['-y', 'finhay-mcp-server'] };
+        fs.writeFileSync('$CONFIG_PATH', JSON.stringify(config, null, 2));
+    "
 else
     cat > "$CONFIG_PATH" <<'EOF'
 {
@@ -176,12 +113,82 @@ EOF
 fi
 
 echo ""
-if [ "$OVERWROTE_CREDS" = "1" ]; then
-    echo "Da Cap nhat Credentials thanh cong!"
-else
-    echo "Da cai dat thanh cong!"
+echo "Cai dat config Finhay MCP Claude Desktop thanh cong $CONFIG_PATH"
+echo ""
+
+# --- Step 3: Credentials ---
+CREDS_DIR="$HOME/.finhay/credentials"
+CREDS_FILE="$CREDS_DIR/.env"
+
+CREDS_ACTION=""   # create | update | reuse
+
+if [ -f "$CREDS_FILE" ]; then
+    EXISTING_KEY=$(sed -n 's/^FINHAY_API_KEY=//p' "$CREDS_FILE" 2>/dev/null || true)
+    EXISTING_SECRET=$(sed -n 's/^FINHAY_API_SECRET=//p' "$CREDS_FILE" 2>/dev/null || true)
+
+    if [ -n "$EXISTING_KEY" ] && [ -n "$EXISTING_SECRET" ]; then
+        MASKED_KEY="$(echo "$EXISTING_KEY" | cut -c1-8)***"
+        echo "  Tim thay credentials tai $CREDS_FILE"
+        echo "  API Key: $MASKED_KEY"
+        echo ""
+        read -p "Ban co muon thay the khong? (y/n): " REPLACE
+        REPLACE_LOWER=$(echo "$REPLACE" | tr '[:upper:]' '[:lower:]')
+        if [ "$REPLACE_LOWER" = "y" ]; then
+            CREDS_ACTION="update"
+        else
+            CREDS_ACTION="reuse"
+        fi
+        echo ""
+    fi
 fi
-echo "  - Credentials: $CREDS_FILE"
-echo "  - Claude Desktop config: $CONFIG_PATH"
+
+if [ -z "$CREDS_ACTION" ]; then
+    CREDS_ACTION="create"
+fi
+
+if [ "$CREDS_ACTION" = "create" ] || [ "$CREDS_ACTION" = "update" ]; then
+    if [ "$CREDS_ACTION" = "update" ]; then
+        read -p "Nhap API Key moi: " API_KEY
+    else
+        read -p "Nhap API Key: " API_KEY
+    fi
+    if [ -z "$API_KEY" ]; then
+        echo "  Loi: API Key khong duoc de trong."
+        exit 1
+    fi
+
+    if [ "$CREDS_ACTION" = "update" ]; then
+        read_masked "Nhap Secret Key moi: "
+    else
+        read_masked "Nhap Secret Key: "
+    fi
+    API_SECRET="$REPLY"
+    if [ -z "$API_SECRET" ]; then
+        echo "  Loi: Secret Key khong duoc de trong."
+        exit 1
+    fi
+
+    mkdir -p "$CREDS_DIR"
+    cat > "$CREDS_FILE" <<EOF
+FINHAY_API_KEY=$API_KEY
+FINHAY_API_SECRET=$API_SECRET
+FINHAY_BASE_URL=https://open-api.fhsc.com.vn
+EOF
+    chmod 600 "$CREDS_FILE"
+fi
+
+echo ""
+case "$CREDS_ACTION" in
+    create)
+        echo "Tao Credentials thanh cong tai $CREDS_FILE"
+        ;;
+    update)
+        echo "Cap nhat Credentials thanh cong tai $CREDS_FILE"
+        ;;
+    reuse)
+        echo "Su dung credentials hien co tai $CREDS_FILE"
+        ;;
+esac
+echo ""
 echo "Hay khoi dong lai ung dung de su dung"
 echo ""

@@ -137,9 +137,17 @@ function updateClaudeConfig(): string {
 async function main() {
     console.log('\n  Finhay MCP Server — Cai dat cho Claude Desktop\n');
 
-    let apiKey = '';
-    let apiSecret = '';
-    let overwroteCreds = false;
+    // --- Step 1: Node.js — checked by the wrapper / npx; nothing to do here ---
+
+    // --- Step 2: Claude Desktop config ---
+    const configPath = updateClaudeConfig();
+    console.log();
+    console.log(`Cai dat config Finhay MCP Claude Desktop thanh cong ${configPath}`);
+    console.log();
+
+    // --- Step 3: Credentials ---
+    type CredsAction = 'create' | 'update' | 'reuse';
+    let credsAction: CredsAction = 'create';
 
     if (fs.existsSync(CREDENTIALS_PATH)) {
         const content = fs.readFileSync(CREDENTIALS_PATH, 'utf-8');
@@ -152,18 +160,13 @@ async function main() {
             console.log(`  API Key: ${maskedKey}\n`);
 
             const replace = await ask('Ban co muon thay the khong? (y/n): ');
-            if (replace.toLowerCase() === 'y') {
-                overwroteCreds = true;
-            } else {
-                apiKey = keyMatch[1].trim();
-                apiSecret = secretMatch[1].trim();
-            }
+            credsAction = replace.toLowerCase() === 'y' ? 'update' : 'reuse';
             console.log();
         }
     }
 
-    if (!apiKey) {
-        apiKey = overwroteCreds
+    if (credsAction === 'create' || credsAction === 'update') {
+        const apiKey = credsAction === 'update'
             ? await ask('Nhap API Key moi: ')
             : await ask('Nhap API Key: ');
         if (!apiKey) {
@@ -171,11 +174,11 @@ async function main() {
             process.exit(1);
         }
 
-        apiSecret = overwroteCreds
+        const apiSecret = credsAction === 'update'
             ? await askMasked('Nhap Secret Key moi: ')
             : await askMasked('Nhap Secret Key: ');
         if (!apiSecret) {
-            console.error('\n  Loi: API Secret khong duoc de trong.\n');
+            console.error('\n  Loi: Secret Key khong duoc de trong.\n');
             process.exit(1);
         }
 
@@ -186,12 +189,15 @@ async function main() {
         });
     }
 
-    const configPath = updateClaudeConfig();
-
     console.log();
-    console.log(overwroteCreds ? 'Da Cap nhat Credentials thanh cong!' : 'Da cai dat thanh cong!');
-    console.log(`  - Credentials: ${CREDENTIALS_PATH}`);
-    console.log(`  - Claude Desktop config: ${configPath}`);
+    if (credsAction === 'create') {
+        console.log(`Tao Credentials thanh cong tai ${CREDENTIALS_PATH}`);
+    } else if (credsAction === 'update') {
+        console.log(`Cap nhat Credentials thanh cong tai ${CREDENTIALS_PATH}`);
+    } else {
+        console.log(`Su dung credentials hien co tai ${CREDENTIALS_PATH}`);
+    }
+    console.log();
     console.log('Hay khoi dong lai ung dung de su dung');
     console.log();
 }

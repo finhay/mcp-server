@@ -281,8 +281,8 @@ export function registerMarketTools(server: McpServer, client: FinhayClient): vo
         'Get macroeconomic indicators for Vietnam or US (CPI, PMI, IIP, FED rate, etc.). JP and DE are only valid when type=GOVERNMENT_10Y_BOND_YIELD.',
         {
             type: z.enum([
-                'IIP', 'CPI', 'PMI', 'PCE', 'CORE_PCE', 'NFP', 'GOODS_RETAIL', 'SERVICE_RETAIL',
-                'TOTAL_EXPORT', 'FDI_EXPORT', 'DOMESTIC_EXPORT', 'FED_FUNDS_RATE', 'INTERBANK_RATE',
+                'IIP', 'CPI', 'PMI', 'PCE', 'CORE_PCE', 'NFP',
+                'FED_FUNDS_RATE', 'INTERBANK_RATE',
                 'GOVERNMENT_10Y_BOND_YIELD', 'UNEMPLOYMENT_RATE',
             ]).describe('Macro indicator type'),
             country: z.enum(['VN', 'US', 'JP', 'DE']).describe('Country code (JP/DE only for GOVERNMENT_10Y_BOND_YIELD)'),
